@@ -64,19 +64,19 @@ const verbose = true
 func (w q1) Map(key, value string, emitter corral.Emitter) {
 	//line := strings.FieldsFunc(value,
 	//	func(c rune) bool { return c == '|' })
-	line := strings.Split(value,"|")
+	line := strings.Split(value, ",")
 	if len(line) < 15 {
 		return
 	}
 
-	shipdate_value :=  line[L_SHIPDATE]
+	shipdate_value := line[L_SHIPDATE]
 
-	s_year,_ := strconv.Atoi(shipdate_value[0:4])
-	s_month,_ := strconv.Atoi(shipdate_value[6:7])
-	s_day,_ := strconv.Atoi(shipdate_value[9:10])
+	s_year, _ := strconv.Atoi(shipdate_value[0:4])
+	s_month, _ := strconv.Atoi(shipdate_value[6:7])
+	s_day, _ := strconv.Atoi(shipdate_value[9:10])
 
 	//shipdate, _ := time.Parse("2006-01-02", line[L_SHIPDATE])
-	shipdate := time.Date(s_year,time.Month(s_month),s_day,0,0,0,0,time.Local)
+	shipdate := time.Date(s_year, time.Month(s_month), s_day, 0, 0, 0, 0, time.Local)
 	if shipdate.Before(w.shipdate) {
 		l_returnflag := line[L_RETURNFLAG]
 		l_linestatus := line[L_LINESTATUS]
@@ -85,11 +85,11 @@ func (w q1) Map(key, value string, emitter corral.Emitter) {
 			line[L_EXTENDEDPRICE],
 			line[L_DISCOUNT],
 			line[L_TAX],
-		}, "|")
+		}, ",")
 
 		sEnc := b64.StdEncoding.EncodeToString([]byte(data))
 
-		emitter.Emit(l_returnflag+"|"+l_linestatus, sEnc)
+		emitter.Emit(l_returnflag+","+l_linestatus, sEnc)
 	}
 
 }
@@ -113,7 +113,7 @@ func (w q1) Reduce(key string, values corral.ValueIterator, emitter corral.Emitt
 
 	for value := range values.Iter() {
 		data, _ := b64.StdEncoding.DecodeString(value)
-		line := strings.Split(string(data), "|")
+		line := strings.Split(string(data), ",")
 
 		l_quantity := saveFloat(line, 0)
 		l_extendedprice := saveFloat(line, 1)
